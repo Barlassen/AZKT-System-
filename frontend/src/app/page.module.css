@@ -1,0 +1,139 @@
+.main {
+  min-height: 100vh;
+  padding: 0;
+  background: #ffffff;
+}
+
+.container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* SBB Style Header */
+.header {
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.menuButton {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #000000;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.headerLink {
+  color: #000000;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  transition: color 0.2s;
+}
+
+.headerLink:hover {
+  color: #DC143C;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.sbbLogo {
+  height: 32px;
+  width: auto;
+}
+
+.header h1 {
+  font-size: 20px;
+  color: #DC143C;
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Main Content Area */
+.content {
+  background: #DC143C;
+  padding: 40px 20px;
+  min-height: 400px;
+  position: relative;
+}
+
+.searchCard {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 10;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: #000000;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.description {
+  font-size: 14px;
+  color: #666666;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  padding: 32px 20px;
+  background: #ffffff;
+  color: #666666;
+  font-size: 14px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.footer p {
+  margin: 8px 0;
+  color: #000000;
+}
+
+.footerIcon {
+  margin-right: 6px;
+}

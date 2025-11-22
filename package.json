@@ -1,0 +1,28 @@
+{
+  "name": "azkt-system",
+  "version": "0.1.0",
+  "description": "Anonymous Zero-Knowledge Ticket System for SBB CFF FFS",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "verification"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=frontend & npm run dev --workspace=backend",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "setup": "npm install --workspaces"
+  },
+  "keywords": [
+    "zero-knowledge",
+    "privacy",
+    "ticketing",
+    "anonymous",
+    "sbb",
+    "public-transport"
+  ],
+  "author": "AZKT Team",
+  "license": "MIT"
+}
+

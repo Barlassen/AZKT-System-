@@ -1,0 +1,103 @@
+.historyContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  max-width: 300px;
+}
+
+.toggleButton {
+  background: #DC143C;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.toggleButton:hover {
+  background: #B01030;
+  box-shadow: 0 6px 16px rgba(220, 20, 60, 0.4);
+  transform: translateY(-2px);
+}
+
+.historyList {
+  margin-top: 12px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.ticketItem {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ticketItem:last-child {
+  border-bottom: none;
+}
+
+.ticketItem:hover {
+  background: #f5f5f5;
+}
+
+.ticketItem.expired {
+  opacity: 0.6;
+}
+
+.ticketHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.route {
+  font-weight: 600;
+  color: #000;
+  font-size: 15px;
+}
+
+.expiredBadge {
+  background: #ffcccc;
+  color: #DC143C;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ticketDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #666;
+}
+
+.price {
+  color: #DC143C;
+  font-weight: 600;
+}
+

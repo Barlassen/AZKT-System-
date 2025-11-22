@@ -1,0 +1,151 @@
+.ticketContainer {
+  position: relative;
+}
+
+.ticketContainer {
+  position: relative;
+}
+
+.ticketInfo {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+@media print {
+  .ticketContainer {
+    page-break-inside: avoid;
+  }
+  .ticketInfo {
+    border: 2px solid #000;
+    page-break-inside: avoid;
+  }
+  .actions {
+    display: none;
+  }
+  .security, .note {
+    display: none;
+  }
+}
+
+@media print {
+  .ticketContainer {
+    page-break-inside: avoid;
+  }
+  .ticketInfo {
+    border: 2px solid #000;
+    page-break-inside: avoid;
+  }
+  .actions {
+    display: none;
+  }
+  .security, .note {
+    display: none;
+  }
+}
+
+.route,
+.validity,
+.ticketId {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.route:last-child,
+.validity:last-child,
+.ticketId:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.label {
+  font-weight: 600;
+  color: #000000;
+}
+
+.value {
+  color: #333333;
+  text-align: right;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.copyBtn {
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.copyBtn:hover {
+  background: #333333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.copyBtn:active {
+  transform: translateY(0);
+}
+
+.security {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.security p {
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #000000;
+  font-size: 16px;
+}
+
+.security ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.security li {
+  padding: 6px 0;
+  color: #333333;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.security li:before {
+  content: "🔒 ";
+  margin-right: 6px;
+}
+
+.note {
+  margin-top: 20px;
+  padding: 14px;
+  background: #fff5f5;
+  border-radius: 8px;
+  font-size: 14px;
+  border: 1px solid #ffcccc;
+}
+
+.note p {
+  margin: 4px 0;
+  color: #DC143C;
+  font-weight: 500;
+}

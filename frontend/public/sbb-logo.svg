@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" width="120" height="40">
+  <!-- SBB Logo - Red square with white text -->
+  <rect width="40" height="40" fill="#DC143C" rx="4"/>
+  <text x="20" y="28" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">SBB</text>
+</svg>

@@ -2,10 +2,16 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { IssueTicketDto } from './dto/issue-ticket.dto';
 import { CheckTicketDto } from './dto/check-ticket.dto';
+import { AllocateTicketDto } from './dto/allocate-ticket.dto';
 
 @Controller('ticket')
 export class TicketController {
-  constructor(private readonly ticketService: TicketService) {}
+  constructor(private readonly ticketService: TicketService) { }
+
+  @Post('allocate')
+  async allocate(@Body() dto: AllocateTicketDto) {
+    return this.ticketService.allocateTicket(dto);
+  }
 
   @Post('issue')
   async issue(@Body() dto: IssueTicketDto) {

@@ -12,18 +12,31 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
     const translations = getTranslations(language)
     return translations[key] || key
   }
-  const [routes, setRoutes] = useState([])
+  const [routes, setRoutes] = useState([
+    { id: 'lausanne-geneva', from: 'Lausanne', to: 'Geneva', duration: 55, price: 15.00 },
+    { id: 'zurich-bern', from: 'Zurich', to: 'Bern', duration: 60, price: 18.00 },
+    { id: 'basel-zurich', from: 'Basel', to: 'Zurich', duration: 55, price: 16.00 },
+    { id: 'geneva-lausanne', from: 'Geneva', to: 'Lausanne', duration: 55, price: 15.00 },
+    { id: 'basel-bern', from: 'Basel', to: 'Bern', duration: 75, price: 22.00 },
+    { id: 'zurich-lausanne', from: 'Zurich', to: 'Lausanne', duration: 135, price: 32.00 },
+    { id: 'bern-geneva', from: 'Bern', to: 'Geneva', duration: 95, price: 25.00 },
+    { id: 'lausanne-zurich', from: 'Lausanne', to: 'Zurich', duration: 135, price: 32.00 },
+    { id: 'bern-basel', from: 'Bern', to: 'Basel', duration: 75, price: 22.00 },
+    { id: 'zurich-basel', from: 'Zurich', to: 'Basel', duration: 55, price: 16.00 },
+    { id: 'geneva-zurich', from: 'Geneva', to: 'Zurich', duration: 175, price: 38.00 },
+    { id: 'bern-lausanne', from: 'Bern', to: 'Lausanne', duration: 95, price: 25.00 }
+  ])
   const [selectedFrom, setSelectedFrom] = useState('')
   const [selectedTo, setSelectedTo] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [ticketType, setTicketType] = useState('single')
-  const [loadingRoutes, setLoadingRoutes] = useState(true)
+  const [loadingRoutes, setLoadingRoutes] = useState(false)
   const [departArrive, setDepartArrive] = useState('depart') // 'depart' or 'arrive'
   const [discountRate, setDiscountRate] = useState(0)
 
   useEffect(() => {
-    fetchRoutes()
+    // fetchRoutes()
     // Set default date to today
     const today = new Date().toISOString().split('T')[0]
     setSelectedDate(today)
@@ -73,7 +86,7 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
     // Find route or calculate price
     const route = routes.find(r => r.from === selectedFrom && r.to === selectedTo)
     let price = route?.price || 15.00
-    
+
     // Adjust price based on ticket type
     if (ticketType === 'day-pass') {
       price = price * 1.5 // Day pass is 50% more expensive
@@ -102,7 +115,6 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
     setSelectedTo(temp)
   }
 
-  // Get unique stations from routes
   const getUniqueStations = () => {
     const stations = new Set()
     routes.forEach(route => {
@@ -176,7 +188,7 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
             disabled={!selectedFrom || !selectedTo}
           >
             <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
+              <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z" />
             </svg>
           </button>
 
@@ -236,10 +248,10 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
                 required
                 style={{ paddingRight: '40px' }}
               />
-              <span style={{ 
-                position: 'absolute', 
-                right: '12px', 
-                top: '50%', 
+              <span style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
                 transform: 'translateY(-50%)',
                 pointerEvents: 'none',
                 color: '#666'
@@ -309,10 +321,10 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
 
         {/* Price Display */}
         {selectedFrom && selectedTo && (
-          <div style={{ 
-            marginTop: '20px', 
-            padding: '16px', 
-            background: '#fff5f5', 
+          <div style={{
+            marginTop: '20px',
+            padding: '16px',
+            background: '#fff5f5',
             border: '1px solid #ffcccc',
             borderRadius: '8px'
           }}>
@@ -323,7 +335,7 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
                 basePrice = basePrice * 1.5
               }
               const finalPrice = discountRate > 0 ? applyDiscount(basePrice, discountRate) : basePrice
-              
+
               return (
                 <>
                   {discountRate > 0 && (

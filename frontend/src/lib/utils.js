@@ -1,4 +1,4 @@
-const generateSecret = (): bigint => {
+const generateSecret = () => {
   const bytes = new Uint8Array(32)
   crypto.getRandomValues(bytes)
   let acc = 0n

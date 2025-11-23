@@ -9,11 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aztec/bb.js": "^2.1.7",
+    "@noir-lang/noir_js": "^1.0.0-beta.15",
+    "@noir-lang/noir_wasm": "^1.0.0-beta.15",
+    "buffer": "^6.0.3",
     "next": "^14.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "poseidon-lite": "^0.3.0",
     "qrcode": "^1.5.3",
     "qrcode.react": "^3.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },
@@ -21,9 +26,8 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "typescript": "^5.0.0",
     "eslint": "^8.0.0",
-    "eslint-config-next": "^14.0.0"
+    "eslint-config-next": "^14.0.0",
+    "typescript": "^5.0.0"
   }
 }
-

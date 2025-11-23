@@ -1,35 +1,15 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
+import { TicketMetadataPublicDto } from './ticket-metadata.dto';
 
-export class TicketMetadataDto {
-  @IsString()
-  @IsNotEmpty()
-  origin: string;
-
-  @IsString()
-  @IsNotEmpty()
-  destination: string;
-
-  @IsString()
-  @IsNotEmpty()
-  date: string;
-
-  @IsString()
-  @IsNotEmpty()
-  class: string;
-
-  @IsString()
-  @IsNotEmpty()
-  product_type: string;
+export class IssueTicketDto {
+  md: TicketMetadataPublicDto;
 
   @IsString()
   @IsNotEmpty()
   ticket_id: string;
-}
-
-export class IssueTicketDto {
-  md: TicketMetadataDto;
 
   @IsString()
   @IsNotEmpty()
   C: string;
 }
+

@@ -1,9 +1,9 @@
 
 import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
-import { TicketMetadataDto } from './issue-ticket.dto';
+import { TicketMetadataPublicDto } from './ticket-metadata.dto';
 
 export class PublicInputsDto {
-  md: TicketMetadataDto;
+  md: TicketMetadataPublicDto
 
   @IsString()
   @IsNotEmpty()

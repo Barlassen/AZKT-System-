@@ -1,9 +1,10 @@
-// src/ticket/ticket.service.ts
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IssueTicketDto } from './dto/issue-ticket.dto';
+import { AllocateTicketDto } from './dto/allocate-ticket.dto';
 import { CheckTicketDto } from './dto/check-ticket.dto';
 import { CryptoService } from '../crypto/crypto.service';
+import { randomBytes } from 'crypto';
 
 type LogEntry = {
   timestamp: number;
@@ -16,9 +17,8 @@ export class TicketService {
   private nullifierLog = new Map<string, LogEntry[]>();
 
   constructor(
-    private readonly config: ConfigService,
     private readonly crypto: CryptoService,
-  ) {}
+  ) { }
 
   private checkFraud(N: string, newEntry: LogEntry) {
     const entries = this.nullifierLog.get(N) || [];
@@ -34,8 +34,40 @@ export class TicketService {
     return { fraud: false };
   }
 
+  private generateTicketId(): string {
+    const bytes = randomBytes(31);
+    let acc = 0n;
+    for (const b of bytes) {
+      acc = (acc << 8n) + BigInt(b);
+    }
+    return acc.toString();
+  }
+
+  /**
+   * Allocate a new ticket_id for given public metadata.
+   * No secret s here, no commitment yet.
+   */
+  async allocateTicket(dto: AllocateTicketDto) {
+    const { md } = dto;
+
+    const ticket_id = this.generateTicketId();
+
+    return {
+      ok: true,
+      md,
+      ticket_id,
+    };
+  }
+
+  /**
+   * Issue ticket:
+   * Client calls this AFTER /ticket/allocate, with:
+   * - md (same as allocation)
+   * - ticket_id (from allocate response)
+   * - C = Poseidon2([ticket_id, s]) computed client-side
+   */
   async issueTicket(dto: IssueTicketDto) {
-    const { md, C } = dto;
+    const { md, ticket_id, C } = dto;
 
     const msgFields: bigint[] = [
       BigInt(md.origin),
@@ -43,7 +75,7 @@ export class TicketService {
       BigInt(md.date),
       BigInt(md.class),
       BigInt(md.product_type),
-      BigInt(md.ticket_id),
+      BigInt(ticket_id),
       BigInt(C),
     ];
 

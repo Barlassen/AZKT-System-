@@ -66,49 +66,97 @@ export default function Home() {
     setShowPayment(false)
 
     try {
-      const userPublicKey = wallet.getPublicKey()
-      const userPrivateKey = wallet.keyPair ? 
-        encodeBase64(wallet.keyPair.secretKey) : null
-
-      if (!userPrivateKey) {
-        throw new Error('Private key not available')
-      }
-
-      const response = await fetch(`${BACKEND_URL}/api/ticket/request`, {
+      const allocResp = await fetch(`${BACKEND_URL}/ticket/allocate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          start: pendingTicketData.start,
-          destination: pendingTicketData.destination,
-          date: pendingTicketData.date,
-          time: pendingTicketData.time,
-          ticketType: pendingTicketData.ticketType,
-          price: pendingTicketData.price,
-          userPublicKey: userPublicKey,
-          userPrivateKey: userPrivateKey,
+          md: {
+            origin: pendingTicketData.start,
+            destination: pendingTicketData.destination,
+            date: pendingTicketData.date,
+            class: '2',
+            product_type: pendingTicketData.ticketType,
+          },
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate ticket')
+      if (!allocResp.ok) {
+        const errorData = await allocResp.json()
+        throw new Error(errorData.error || 'Failed to allocate ticket')
       }
 
-      const result = await response.json()
-      setTicket(result.ticket)
-      setZkProofData(result.zkProofData)
-      
-      // Save ticket to history
-      if (window.azktSaveTicket) {
-        window.azktSaveTicket(result.ticket)
+      const allocData = await allocResp.json()
+      const { md, ticket_id } = allocData
+
+      const sBig = generateSecret()
+      const s = sBig.toString()
+
+      const ticketIdField = BigInt(ticket_id)
+      const CField = poseidon2([ticketIdField, sBig])
+      const C = CField.toString()
+
+      const NField = poseidon1([sBig])
+      const N = NField.toString()
+
+      const issueResp = await fetch(`${BACKEND_URL}/ticket/issue`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ md, ticket_id, C }),
+      })
+
+      if (!issueResp.ok) {
+        const errorData = await issueResp.json()
+        throw new Error(errorData.error || 'Failed to issue ticket')
       }
-      
+
+      const issueData = await issueResp.json()
+      if (!issueData.ok) {
+        throw new Error(issueData.reason || 'Ticket issue failed')
+      }
+
+      const { pk_TA, sig } = issueData
+
+      const fullTicket = {
+        start: pendingTicketData.start,
+        destination: pendingTicketData.destination,
+        date: pendingTicketData.date,
+        time: pendingTicketData.time,
+        ticketType: pendingTicketData.ticketType,
+        price: pendingTicketData.price,
+        validity: {
+          end: new Date(
+            new Date(pendingTicketData.date + 'T' + pendingTicketData.time).getTime() +
+            4 * 60 * 60 * 1000,
+          ).toISOString(),
+        },
+        md,
+        C,
+        N,
+        pk_TA,
+        sig,
+        ticket_id,
+        s,
+
+        zkProofPayload: null,
+      }
+
+      setTicket(fullTicket)
+      setZkProofData(null)
+
+      try {
+        const existing = JSON.parse(localStorage.getItem('azkt-tickets') || '[]')
+        existing.push(fullTicket)
+        localStorage.setItem('azkt-tickets', JSON.stringify(existing))
+        if (window.azktSaveTicket) {
+          window.azktSaveTicket(fullTicket)
+        }
+      } catch (e) {
+        console.warn('Failed to persist ticket history', e)
+      }
+
       setPendingTicketData(null)
-
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Ticket request error')
       console.error('Ticket request error:', err)
     } finally {
       setLoading(false)
@@ -174,17 +222,28 @@ export default function Home() {
               />
             ) : (
               <QRDisplay
-                ticket={ticket}
-                zkProofData={zkProofData}
-                language={language}
-                onNewTicket={() => {
-                  setTicket(null)
-                  setZkProofData(null)
-                  const newWallet = new EphemeralWallet()
-                  newWallet.generate()
-                  setWallet(newWallet)
-                }}
-              />
+                  ticket={ticket}
+                  language={language}
+                  onNewTicket={() => {
+                    setTicket(null)
+                    setZkProofData(null)
+                  }}
+                  onTicketUpdate={(updatedTicket) => {
+                    setTicket(updatedTicket)
+                    setZkProofData(updatedTicket.zkProofPayload || null)
+
+                    try {
+                      const existing = JSON.parse(localStorage.getItem('azkt-tickets') || '[]')
+                      const idx = existing.findIndex((t) => t.ticket_id === updatedTicket.ticket_id)
+                      if (idx >= 0) {
+                        existing[idx] = updatedTicket
+                        localStorage.setItem('azkt-tickets', JSON.stringify(existing))
+                      }
+                    } catch (e) {
+                      console.warn('Failed to update ticket in history', e)
+                    }
+                  }}
+                />
             )}
 
             {showPayment && pendingTicketData && (

@@ -1,72 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { IssueTicketDto } from './dto/issue-ticket.dto';
-import { AllocateTicketDto } from './dto/allocate-ticket.dto';
-import { CheckTicketDto } from './dto/check-ticket.dto';
 import { CryptoService } from '../crypto/crypto.service';
-import { randomBytes } from 'crypto';
+import { IssueTicketDto } from './dto/issue-ticket.dto';
 import { stationToField, dateToField, ClassMap, ProductTypeMap } from './types';
-
-type LogEntry = {
-  timestamp: number;
-  train_id: string;
-  segment: string;
-};
 
 @Injectable()
 export class TicketService {
-  private nullifierLog = new Map<string, LogEntry[]>();
+  constructor(private readonly crypto: CryptoService) { }
 
-  constructor(
-    private readonly crypto: CryptoService,
-  ) { }
-
-  private checkFraud(N: string, newEntry: LogEntry) {
-    const entries = this.nullifierLog.get(N) || [];
-
-    for (const e of entries) {
-      const sameTrain = e.train_id === newEntry.train_id;
-      const dt = Math.abs(newEntry.timestamp - e.timestamp);
-      if (!sameTrain && dt < 20 * 60 * 1000) {
-        return { fraud: true, reason: 'parallel_use_different_trains' };
-      }
-    }
-
-    return { fraud: false };
-  }
-
-  private generateTicketId(): string {
-    const bytes = randomBytes(31);
-    let acc = 0n;
-    for (const b of bytes) {
-      acc = (acc << 8n) + BigInt(b);
-    }
-    return acc.toString();
-  }
-
-  /**
-   * Allocate a new ticket_id for given public metadata.
-   * No secret s here, no commitment yet.
-   */
-  async allocateTicket(dto: AllocateTicketDto) {
-    const { md } = dto;
-
-    const ticket_id = this.generateTicketId();
-
-    return {
-      ok: true,
-      md,
-      ticket_id,
-    };
-  }
-
-  /**
-   * Issue ticket:
-   * Client calls this AFTER /ticket/allocate, with:
-   * - md (same as allocation)
-   * - ticket_id (from allocate response)
-   * - C = Poseidon2([ticket_id, s]) computed client-side
-   */
   async issueTicket(dto: IssueTicketDto) {
     const { md, ticket_id, C } = dto;
 
@@ -76,14 +16,17 @@ export class TicketService {
     const classF = BigInt(ClassMap[md.class]);
     const productTypeF = BigInt(ProductTypeMap[md.product_type]);
 
+    const ticketIdF = BigInt(ticket_id);
+    const CF = BigInt(C);
+
     const msgFields: bigint[] = [
       originF,
       destinationF,
       dateF,
       classF,
       productTypeF,
-      BigInt(ticket_id),
-      BigInt(C),
+      ticketIdF,
+      CF,
     ];
 
     const { R_x, R_y, s } = this.crypto.signTicketMessage(msgFields);
@@ -98,28 +41,8 @@ export class TicketService {
       sig: {
         R_x: R_x.toString(),
         R_y: R_y.toString(),
-        s: s.toString(),
+        s: s.toString(), // EdDSA scalar
       },
-    };
-  }
-
-  async checkTicket(dto: CheckTicketDto) {
-    const { publicInputs, train_id, segment, timestamp } = dto;
-
-    const { N } = publicInputs;
-    const now = typeof timestamp === 'number' ? timestamp : Date.now();
-    const entry: LogEntry = { timestamp: now, train_id, segment };
-
-    const { fraud, reason } = this.checkFraud(N, entry);
-
-    const existing = this.nullifierLog.get(N) || [];
-    existing.push(entry);
-    this.nullifierLog.set(N, existing);
-
-    return {
-      ok: true,
-      fraud,
-      reason: fraud ? reason : undefined,
     };
   }
 }

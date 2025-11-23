@@ -381,18 +381,6 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
       <div className={styles.info} style={{ marginTop: '24px' }}>
         <strong>🔒</strong> {t('anonymous')} • <strong>{t('noPersonalData')}</strong> • <strong>{t('copySafe')}</strong> • <strong>{t('printHome')}</strong>
       </div>
-
-      {/* Features */}
-      <div className={styles.features}>
-        <p style={{ color: '#DC143C', fontWeight: '700' }}>✨ {t('sbbFeatures')}:</p>
-        <ul>
-          <li><strong style={{ color: '#000' }}>{t('copySafe')}:</strong> {t('copySafeDesc')}</li>
-          <li><strong style={{ color: '#000' }}>{t('anonymous')}:</strong> {t('anonymousDesc')}</li>
-          <li><strong style={{ color: '#000' }}>{t('multiCheck')}:</strong> {t('multiCheckDesc')}</li>
-          <li><strong style={{ color: '#000' }}>{t('printHome')}:</strong> {t('printHomeDesc')}</li>
-          <li><strong style={{ color: '#000' }}>{t('easyAccess')}:</strong> {t('easyAccessDesc')}</li>
-        </ul>
-      </div>
     </div>
   )
 }

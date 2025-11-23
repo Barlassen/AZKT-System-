@@ -6,6 +6,26 @@ import { getTranslations } from '../lib/i18n'
 import { proveTicket } from '../zk_circuit/noir'
 import styles from './QRDisplay.module.css'
 
+// Must match backend maps exactly
+const StationMap = {
+  Bern: 1,
+  Zurich: 2,
+  Lausanne: 3,
+  Geneva: 4,
+  Basel: 5,
+}
+
+const ProductTypeMap = {
+  single: 1,
+  'day-pass': 2,
+  supersaver: 3,
+}
+
+const ClassMap = {
+  '1': 1,
+  '2': 2,
+}
+
 export default function QRDisplay({
   ticket,
   onNewTicket,
@@ -24,13 +44,14 @@ export default function QRDisplay({
 
   useEffect(() => {
     setLocalTicket(ticket)
-    setProofLoading(!ticket.zkProofPayload)
+    setProofLoading(!ticket?.zkProofPayload)
     setProofError(null)
   }, [ticket])
 
   useEffect(() => {
     const generateProof = async () => {
-      if (!localTicket || localTicket.zkProofPayload) return
+      if (!localTicket) return
+      if (localTicket.zkProofPayload) return
 
       try {
         setProofLoading(true)
@@ -38,38 +59,78 @@ export default function QRDisplay({
 
         const { md, C, N, pk_TA, sig, s, ticket_id } = localTicket
 
-        const { proof, isValid } = await proveTicket({
-          md,
-          C,
-          N,
-          pk_TA,
-          sig,
-          s,
-          ticket_id,
-        })
+        if (!md || !pk_TA || !sig) {
+          throw new Error('Missing ZK inputs on ticket')
+        }
+
+        // 🔥 Encode md fields into integers (as Noir Fields)
+        const encodedMd = {
+          origin: String(StationMap[md.origin]),
+          destination: String(StationMap[md.destination]),
+          // same logic as backend dateToField: seconds since epoch
+          date: String(Math.floor(new Date(md.date).getTime() / 1000)),
+          class: String(ClassMap[md.class]),
+          product_type: String(ProductTypeMap[md.product_type]),
+        }
+
+        if (
+          encodedMd.origin === 'undefined' ||
+          encodedMd.destination === 'undefined' ||
+          encodedMd.class === 'undefined' ||
+          encodedMd.product_type === 'undefined'
+        ) {
+          throw new Error('Unknown station/class/product_type in md')
+        }
+
+        // Build Noir input exactly like the circuit expects
+        const noirInput = {
+          md: encodedMd,
+          C: C.toString(),
+          N: N.toString(),
+          pk_TA: {
+            x: pk_TA.x.toString(),
+            y: pk_TA.y.toString(),
+          },
+          sig: {
+            R_x: sig.R_x.toString(),
+            R_y: sig.R_y.toString(),
+            s: sig.s.toString(),
+          },
+          s: s.toString(),
+          ticket_id: ticket_id.toString(),
+        }
+
+        const { proof, isValid } = await proveTicket(noirInput)
 
         if (!isValid) {
           throw new Error('Proof is not valid')
         }
 
-        let proofBytes = [];
+        // Normalize proof to Uint8Array
+        let proofBytes
         if (proof instanceof Uint8Array) {
           proofBytes = proof
         } else if (proof && proof.proof instanceof Uint8Array) {
           proofBytes = proof.proof
-        } else {
+        } else if (Array.isArray(proof)) {
           proofBytes = Uint8Array.from(proof)
+        } else {
+          throw new Error('Unexpected proof format')
         }
-        const proofHex = Buffer.from(proofBytes).toString('hex')
+
+        // Convert proof bytes to hex (no Buffer in browser)
+        const proofHex = Array.from(proofBytes)
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('')
 
         const zkProofPayload = {
           proof: proofHex,
           publicInputs: {
-            md,
-            C,
-            N,
-            pk_TA,
-            sig,
+            md: encodedMd,       // public values as used in circuit
+            C: noirInput.C,
+            N: noirInput.N,
+            pk_TA: noirInput.pk_TA,
+            sig: noirInput.sig,
           },
         }
 
@@ -94,6 +155,23 @@ export default function QRDisplay({
     generateProof()
   }, [localTicket, onTicketUpdate])
 
+
+  const buildQrPayload = (tkt) => {
+    if (!tkt) return {}
+    return {
+      start: tkt.start,
+      destination: tkt.destination,
+      date: tkt.date,
+      time: tkt.time,
+      ticketType: tkt.ticketType,
+      price: tkt.price,
+      validity: tkt.validity,
+      ticketId: tkt.ticket_id,     // so verifier can look up stuff
+      hasZk: !!tkt.zkProofPayload, // just a flag
+    }
+  }
+
+
   const copyToClipboard = () => {
     const qrPayload = buildQrPayload(localTicket)
     const ticketString = JSON.stringify(qrPayload)
@@ -103,20 +181,6 @@ export default function QRDisplay({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const buildQrPayload = (tkt) => {
-    if (!tkt) return '{}'
-    return {
-      start: tkt.start,
-      destination: tkt.destination,
-      date: tkt.date,
-      time: tkt.time,
-      ticketType: tkt.ticketType,
-      price: tkt.price,
-      validity: tkt.validity,
-      zk: tkt.zkProofPayload || null,
-    }
-  }
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', {
       month: 'short',
@@ -124,6 +188,10 @@ export default function QRDisplay({
       hour: '2-digit',
       minute: '2-digit',
     })
+  }
+
+  if (!localTicket) {
+    return <p>{t('noTicket') || 'No ticket available'}</p>
   }
 
   const qrPayload = buildQrPayload(localTicket)
@@ -160,7 +228,9 @@ export default function QRDisplay({
           <span className={styles.value}>{localTicket.destination}</span>
         </div>
         <div className={styles.validity}>
-          <span className={styles.label}>{t('date')} & {t('time')}:</span>
+          <span className={styles.label}>
+            {t('date')} &amp; {t('time')}:
+          </span>
           <span className={styles.value}>
             {localTicket.date} {t('at')} {localTicket.time}
           </span>
@@ -181,7 +251,8 @@ export default function QRDisplay({
             className={styles.value}
             style={{ color: '#DC143C', fontWeight: '700' }}
           >
-            CHF {typeof localTicket.price === 'number'
+            CHF{' '}
+            {typeof localTicket.price === 'number'
               ? localTicket.price.toFixed(2)
               : localTicket.price || '0.00'}
           </span>
@@ -189,7 +260,9 @@ export default function QRDisplay({
       </div>
 
       {proofLoading && (
-        <p style={{ marginTop: '16px' }}>{t('generatingProof') || 'Generating ZK proof…'}</p>
+        <p style={{ marginTop: '16px' }}>
+          {t('generatingProof') || 'Generating ZK proof…'}
+        </p>
       )}
       {proofError && (
         <p style={{ marginTop: '16px', color: '#DC143C' }}>
@@ -197,6 +270,7 @@ export default function QRDisplay({
         </p>
       )}
 
+      {/* QR only once proof is generated and attached */}
       {!proofLoading && localTicket.zkProofPayload && (
         <>
           <div className="qr-container">
@@ -246,7 +320,11 @@ export default function QRDisplay({
           </li>
           <li>
             {t('signature')}:{' '}
-            <strong style={{ color: localTicket.signature ? '#DC143C' : '#666' }}>
+            <strong
+              style={{
+                color: localTicket.signature ? '#DC143C' : '#666',
+              }}
+            >
               {localTicket.signature ? t('signedBySBB') : t('missing')}
             </strong>
           </li>
@@ -258,10 +336,18 @@ export default function QRDisplay({
       </div>
 
       <div className={styles.note}>
-        <p><strong>📱</strong> {t('showQR')}</p>
-        <p><strong>🖨️</strong> {t('printTicket')}</p>
-        <p><strong>✅</strong> {t('multiCheckNote')}</p>
-        <p><strong>🔒</strong> {t('copySafeNote')}</p>
+        <p>
+          <strong>📱</strong> {t('showQR')}
+        </p>
+        <p>
+          <strong>🖨️</strong> {t('printTicket')}
+        </p>
+        <p>
+          <strong>✅</strong> {t('multiCheckNote')}
+        </p>
+        <p>
+          <strong>🔒</strong> {t('copySafeNote')}
+        </p>
       </div>
     </div>
   )

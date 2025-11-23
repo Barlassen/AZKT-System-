@@ -36,8 +36,8 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
 
   const fetchRoutes = async () => {
     try {
-      console.log('Fetching routes from:', `${BACKEND_URL}/api/routes`)
-      const response = await fetch(`${BACKEND_URL}/api/routes`)
+      console.log('Fetching routes from:', `${BACKEND_URL}/itinaries`)
+      const response = await fetch(`${BACKEND_URL}/itinaries`)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }

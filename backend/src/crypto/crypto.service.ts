@@ -21,7 +21,7 @@ export class CryptoService implements OnModuleInit {
     const skHex = this.config.get<string>("TA_PRIVATE_KEY")!;
     if (!skHex) throw new Error('TA_PRIVATE_KEY missing');
 
-    const skBytes = Uint8Array.from(Buffer.from(skHex, "hex"));
+    this.skTA = Uint8Array.from(Buffer.from(skHex, "hex"));
 
     this.pkTA = this.eddsa.prv2pub(this.skTA);
   }

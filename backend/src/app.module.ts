@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { TicketModule } from './ticket/ticket.module';
+import { TicketModule } from './ticket';
+import { ItinaryModule } from './itinary';
 
 @Module({
   imports: [
@@ -8,6 +9,7 @@ import { TicketModule } from './ticket/ticket.module';
       isGlobal: true,
     }),
     TicketModule,
+    ItinaryModule,
   ],
 })
 export class AppModule {}

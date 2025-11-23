@@ -47,28 +47,28 @@ export default function TicketSelector({ onRequestTicket, loading, language = 'e
     setSelectedTime(`${hours}:${minutes}`)
   }, [])
 
-  const fetchRoutes = async () => {
-    try {
-      console.log('Fetching routes from:', `${BACKEND_URL}/itinaries`)
-      const response = await fetch(`${BACKEND_URL}/itinaries`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      const data = await response.json()
-      console.log('Routes received:', data)
-      setRoutes(data.routes || [])
-      if (data.routes && data.routes.length > 0) {
-        console.log(`Loaded ${data.routes.length} routes`)
-      } else {
-        console.warn('No routes found in response')
-      }
-    } catch (error) {
-      console.error('Failed to fetch routes:', error)
-      setRoutes([])
-    } finally {
-      setLoadingRoutes(false)
-    }
-  }
+  // const fetchRoutes = async () => {
+  //   try {
+  //     console.log('Fetching routes from:', `${BACKEND_URL}/itinaries`)
+  //     const response = await fetch(`${BACKEND_URL}/itinaries`)
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`)
+  //     }
+  //     const data = await response.json()
+  //     console.log('Routes received:', data)
+  //     setRoutes(data.routes || [])
+  //     if (data.routes && data.routes.length > 0) {
+  //       console.log(`Loaded ${data.routes.length} routes`)
+  //     } else {
+  //       console.warn('No routes found in response')
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to fetch routes:', error)
+  //     setRoutes([])
+  //   } finally {
+  //     setLoadingRoutes(false)
+  //   }
+  // }
 
   const handleSubmit = (e) => {
     e.preventDefault()

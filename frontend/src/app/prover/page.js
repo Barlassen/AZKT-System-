@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { proveTicket } from "../../zk_circuits/noir.js";
 import { poseidon1, poseidon2 } from "poseidon-lite";
 
-function toField(value: string): bigint {
+function toField(value: string) {
   return BigInt(value);
 }
 
@@ -17,13 +17,13 @@ export default function TicketProver() {
   const [ticketId, setTicketId] = useState("6");
   const [s, setS] = useState("7");
 
-  const [status, setStatus] = useState<string | null>(null);
-  const [proofHex, setProofHex] = useState<string | null>(null);
+  const [status, setStatus] = useState < string | null > (null);
+  const [proofHex, setProofHex] = useState < string | null > (null);
 
-  const [CState, setCState] = useState<string | null>(null);
-  const [NState, setNState] = useState<string | null>(null);
-  const [pkTA, setPkTA] = useState<{ x: string; y: string } | null>(null);
-  const [sig, setSig] = useState<{ R_x: string; R_y: string; s: string } | null>(
+  const [CState, setCState] = useState < string | null > (null);
+  const [NState, setNState] = useState < string | null > (null);
+  const [pkTA, setPkTA] = useState < { x: string; y: string } | null > (null);
+  const [sig, setSig] = useState < { R_x: string; R_y: string; s: string } | null > (
     null,
   );
 
@@ -34,7 +34,7 @@ export default function TicketProver() {
 
       const CBig = poseidon2([toField(ticketId), toField(s)]);
       const NBig = poseidon1([toField(s)]);
-      const C = CBig.toString(); 
+      const C = CBig.toString();
       const N = NBig.toString();
 
       setCState(C);

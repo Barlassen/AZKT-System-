@@ -5,6 +5,7 @@ import { AllocateTicketDto } from './dto/allocate-ticket.dto';
 import { CheckTicketDto } from './dto/check-ticket.dto';
 import { CryptoService } from '../crypto/crypto.service';
 import { randomBytes } from 'crypto';
+import { stationToField, dateToField, ClassMap, ProductTypeMap } from './types';
 
 type LogEntry = {
   timestamp: number;
@@ -69,12 +70,18 @@ export class TicketService {
   async issueTicket(dto: IssueTicketDto) {
     const { md, ticket_id, C } = dto;
 
+    const originF = stationToField(md.origin);
+    const destinationF = stationToField(md.destination);
+    const dateF = dateToField(md.date);
+    const classF = BigInt(ClassMap[md.class]);
+    const productTypeF = BigInt(ProductTypeMap[md.product_type]);
+
     const msgFields: bigint[] = [
-      BigInt(md.origin),
-      BigInt(md.destination),
-      BigInt(md.date),
-      BigInt(md.class),
-      BigInt(md.product_type),
+      originF,
+      destinationF,
+      dateF,
+      classF,
+      productTypeF,
       BigInt(ticket_id),
       BigInt(C),
     ];
@@ -97,7 +104,7 @@ export class TicketService {
   }
 
   async checkTicket(dto: CheckTicketDto) {
-    const { proof, publicInputs, train_id, segment, timestamp } = dto;
+    const { publicInputs, train_id, segment, timestamp } = dto;
 
     const { N } = publicInputs;
     const now = typeof timestamp === 'number' ? timestamp : Date.now();
